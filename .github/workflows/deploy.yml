@@ -1,4 +1,5 @@
-name: Deploy
+# .github/workflows/deploy.yml
+name: Deploy to Render
 
 on:
   push:
@@ -7,22 +8,16 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    needs: test  # Ensure tests pass before deployment
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
-    - name: Deploy to server
+    - name: Deploy to Render
       env:
-        PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
+        RENDER_API_KEY: ${{ secrets.c39c142c6bb9fd3a1cfbec8e4e4c8ffd }}
+        RENDER_SERVICE_ID: ${{ secrets.7086f101054dbfba62c7707959d6cdc1 }}
       run: |
-        echo "$PRIVATE_KEY" > deploy_key
-        chmod 600 deploy_key
-        ssh -o StrictHostKeyChecking=no -i deploy_key ${USERNAME}@${HOST} '
-          cd /path/to/fastapi-book-project &&
-          git pull origin main &&
-          source venv/bin/activate &&
-          pip install -r requirements.txt &&
-          systemctl restart fastapi-app
-        '
+        curl -X POST "https://api.render.com/v1/services/$7086f101054dbfba62c7707959d6cdc1/deploys" \
+        -H "Authorization: Bearer $c39c142c6bb9fd3a1cfbec8e4e4c8ffd" \
+        -H "Content-Type: application/json"
